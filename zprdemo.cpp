@@ -13,6 +13,7 @@ float * dat;
 float zmax;
 vec3d * points;
 
+
 /* Draw axes */
 #define STARTX 500
 #define STARTY 500
@@ -83,11 +84,6 @@ class point{
 };
 
 void drawAxes(void){
-  /* Name-stack manipulation for the purpose of
-  selection hit processing when mouse button
-  is pressed. Names are ignored in normal
-  OpenGL rendering mode. */
-
   glColor3f(0, 0, 1);
   glBegin(GL_LINES);
   glVertex3f(0, 0, 0);
@@ -106,71 +102,6 @@ void drawAxes(void){
   glVertex3f(1, 0, 0);
   glEnd();
 
-
-  /*
-  glPushMatrix();
-  glPushName(0);
-  glTranslatef( a1, a2, a3);
-  glColor3f(1,0,0);
-
-  if(myPickNames.count(0)){
-    glColor3f(0,1,1);
-  }
-  glutSolidSphere(0.5, 8,8 );
-  glPopName();
-  glPopMatrix();
-
-  glPushMatrix();
-  glPushName(4);
-  glColor3f(1,0,0);
-
-  if(myPickNames.count(4)){
-    glColor3f( 0,1,1);
-  }
-
-  glutSolidSphere(0.7, 20, 20);
-  glPopName();
-  glPopMatrix();
-
-  glPushMatrix();
-  glPushName(1);
-  glColor3f(0,0,1);
-
-  if(myPickNames.count(1)){
-    glColor3f(1,1,0);
-  }
-
-  glRotatef(90.*a1,0,1,0);
-  glutSolidCone(0.6, 4.0, 20, 20);
-  glPopName();
-  glPopMatrix();
-
-  glPushMatrix ();
-  glPushName(2);
-
-  glColor3f(0,0,1);
-
-  if(myPickNames.count(2)){
-    glColor3f(1,1,0);
-  }
-
-  glRotatef(-90.*a1,1,0,0);
-  glutSolidCone(0.6, 4.0, 20, 20);
-  glPopName();
-  glPopMatrix();
-
-  glPushMatrix();
-  glColor3f(0,0,1);
-
-  if(myPickNames.count(3)){
-    glColor3f(1,1,0);
-  }
-  glPushName(3);
-  glutSolidCone(0.6, 4.0, 20, 20);
-  glPopName();
-  glPopMatrix();
-  */
-
 }
 
 /* Callback function for drawing */
@@ -185,11 +116,11 @@ void display(void){
     for0(j, ncol){
       k = i * ncol + j;
       glColor3f(0, (points[k].z / zmax) , 1. - (points[k].z / zmax));
-      glPushName(k);
       glBegin(GL_POINTS);
-      points[k].vertex();
+        glPushName(k);
+          points[k].vertex();
+        glPopName();
       glEnd();
-      glPopName();
     }
   }
   glutSwapBuffers();
