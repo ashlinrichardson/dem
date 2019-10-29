@@ -1,0 +1,10 @@
+multiPick: Nigel's ZPR (zoom pan rotate) interface with multiple-picking example for ubuntu
+
+Historical note: On 2016 october 13, added the zprReshape functionality from gift to the original 2012 snapshot of multiPick
+
+Usage:
+in ubuntu, type make
+
+then type ./zpr.exe
+
+click on stuff and see what you see in the terminal output

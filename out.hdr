@@ -1,0 +1,15 @@
+ENVI
+description = {
+out.bin}
+samples = 352
+lines   = 395
+bands   = 1
+header offset = 0
+file type = ENVI Standard
+data type = 4
+interleave = bsq
+byte order = 0
+map info = {Mercator_2SP, 1, 1, -13788777.4093, 6227745.2023, 182.215909090909, 182.025316455696}
+coordinate system string = {PROJCS["Mercator_2SP",GEOGCS["GCS_unnamed ellipse",DATUM["D_unknown",SPHEROID["Unknown",6378137,0]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Mercator"],PARAMETER["standard_parallel_1",0],PARAMETER["central_meridian",0],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["Meter",1]]}
+band names = {
+Band 1}
