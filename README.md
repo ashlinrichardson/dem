@@ -1,4 +1,7 @@
 # dem
-quick and dirty dem visualization, started with repo "multiPick" which is Nigel's ZPR interface multiple-picking example for linux
+quick and dirty dem visualization, started with repo "multiPick" and went from there..data is from:
 
-amd went from there..
+* Canada geospatial extraction tool: https://maps.canada.ca/czs/index-en.html
+
+
+![alt text](dem.png)
