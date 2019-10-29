@@ -5,3 +5,6 @@ quick and dirty dem visualization, started with repo "multiPick" and went from t
 
 
 ![alt text](dem.png)
+
+
+![alt text](downhill.png)
