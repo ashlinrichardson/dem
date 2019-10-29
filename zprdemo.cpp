@@ -12,7 +12,7 @@ size_t nrow, ncol, nband;
 float * dat;
 float zmax;
 vec3d * points;
-
+size_t * down;
 
 /* Draw axes */
 #define STARTX 500
@@ -110,19 +110,30 @@ void display(void){
   drawAxes();
   drawText();
   size_t i, j, k;
+
   glPointSize(2.);
   glColor3f(0, 0, 1.);
   for0(i, nrow){
     for0(j, ncol){
       k = i * ncol + j;
-      glColor3f(0, (points[k].z / zmax) , 1. - (points[k].z / zmax));
+
+      //glPushName(k);
+      /*glColor3f(0, (points[k].z / zmax) , 1. - (points[k].z / zmax));
       glBegin(GL_POINTS);
-        glPushName(k);
-          points[k].vertex();
-        glPopName();
+      points[k].vertex();
       glEnd();
+*/
+
+      glColor3f(0, 1, 0);
+      glBegin(GL_LINES);
+      points[k].vertex();
+      points[down[k]].vertex();
+      glEnd();
+
+      //glPopName();
     }
   }
+
   glutSwapBuffers();
   renderflag = false;
 }
@@ -238,13 +249,38 @@ int main(int argc, char ** argv){
 
   points = new vec3d[nrow * ncol];
   size_t i, j;
-  for0(i, nrow) for0(j, ncol){
-    size_t k = (i * ncol) + j;
-    points[k].x = ((float)i) / ((float)nrow) - .5;
-    points[k].y = ((float)j) / ((float)ncol) - .5;
-    points[k].z = dat[k] / 10000.; // / 300. ;
-    if(dat[k] != 0.) cout << points[k].x << " " << points[k].y << " " << points[k].z << endl;
-    if(points[k].z > zmax) zmax = points[k].z;
+  for0(i, nrow){
+    for0(j, ncol){
+      size_t k = (i * ncol) + j;
+      points[k].x = ((float)i) / ((float)nrow)- .5;
+      points[k].y = ((float)j) / ((float)ncol)- .5;
+      points[k].z = dat[k] / 10000.; // / 300. ;
+      if(dat[k] != 0.) cout << points[k].x << " " << points[k].y << " " << points[k].z << endl;
+      if(points[k].z > zmax) zmax = points[k].z;
+    }
+  }
+
+  down = (size_t *) (void *) alloc(nrow * ncol * sizeof(size_t));
+
+  size_t di, dj, m, u,v;
+  for0(i, nrow){
+    for0(j, ncol){
+      u = i * ncol + j;
+      down[u] = u;
+      for0(m, 4){
+        di = i;
+        dj = j;
+        if(m == 0) di = i - 1;
+        else if (m == 1) di = i + 1;
+        else if (m ==2) dj = j - 1;
+        else dj = j + 1;
+        if(i > 0 && dj > 0 && di < nrow && dj < ncol){
+          // printf("i %d j %d di %d dj %d\n", i, j, di, dj);
+          v = (di * ncol) + dj;
+          if(dat[v] < dat[u]) down[u] = v;
+        }
+      }
+    }
   }
 
   pick = _pick;
