@@ -1,5 +1,5 @@
 # dem
-quick and dirty dem visualization, started with repo "multiPick" and went from there..data is from:
+quick and dirty dem visualization, started with repo "multiPick" and went from there.. data, an extract from around Vancouver Island, is from:
 
 * Canada geospatial extraction tool: https://maps.canada.ca/czs/index-en.html
 
