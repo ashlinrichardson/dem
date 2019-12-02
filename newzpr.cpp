@@ -67,32 +67,31 @@ void zprInit(){
 }
 
 void zprReshape(int w,int h){
-  //callback triggered by fetching active GLUT window ID
-  GLfloat ratio; // http://faculty.ycp.edu/~dbabcock/cs370/labs/lab07.html
-  // Set new screen extents
-  glViewport(0,0,w,h);
+
+  GLfloat ratio;
+  glViewport(0, 0, w, h);
   // Select projection matrix
   glMatrixMode(GL_PROJECTION);
-  //glPushMatrix();
   glLoadIdentity();
+  getMatrix();
+
   // Adjust viewing volume (orthographic)
   // If taller than wide adjust y
-
-  if(w <= h){
-    ratio = ((GLfloat) h)/((GLfloat) w);
-    glOrtho(-1.0f,1.0f,-1.0f*ratio,1.0f*ratio,-1.0f,1.0f);
-    _bottom = -1.*ratio; _top = 1.*ratio;
+  if(w < h){
+    ratio = (GLfloat) h/ (GLfloat) w;
+    glOrtho(-1.0f, 1.0f, -1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
+    _bottom = -1. * ratio; _top = 1. * ratio;
+    _left = -1.; _right = 1.;
   }
-
   // If wider than tall adjust x
   else if (h <= w){
-    ratio = (GLfloat) w/ (GLfloat) h;
-    glOrtho(-1.0f*ratio,1.0f*ratio,-1.0f,1.0f,-1.0f,1.0f);
-    _left = -1.*ratio; _right = 1.*ratio;
+    ratio = (GLfloat) w / (GLfloat) h;
+    glOrtho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f, -1.0f, 1.0f);
+    _left = -1. * ratio; _right = 1. * ratio;
+    _bottom = -1.; _top = 1.;
   }
 
   glMatrixMode(GL_MODELVIEW);
-  return;
   //http://graphics.stanford.edu/courses/cs248-01/OpenGLHelpSession/code_example.html
 }
 

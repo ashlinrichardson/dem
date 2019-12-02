@@ -103,6 +103,35 @@ class vec3d{
   inline void color(){
     glColor3f(x,y,z);
   }
+
+  inline void axis(float L){
+	  // rgb = xyz
+    glColor3f(1, 0, 0);
+    glBegin(GL_LINES);
+    glVertex3f(x, y, z);
+    glVertex3f(x+L, y, z);
+    glEnd();
+
+    glColor3f(0, 1, 0);
+    glBegin(GL_LINES);
+    glVertex3f(x, y, z);
+    glVertex3f(x, y+L, z);
+    glEnd();
+
+    glColor3f(0, 0, 1);
+    glBegin(GL_LINES);
+    glVertex3f(x, y, z);
+    glVertex3f(x, y, z+L);
+    glEnd();
+  }
 };
+
+std::ostream& operator << (std::ostream& os, const vec3d & v){
+  os << "[";
+  os << v.x << "," << v.y << "," << v.z;
+  os << "]";
+  return os;
+}
+
 
 #endif

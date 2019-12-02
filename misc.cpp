@@ -164,7 +164,7 @@ void rewind(ifstream &a){
   a.seekg(0);
 }
 
-bool operator<(const f_idx& a, const f_idx&b){
+bool operator < (const f_idx& a, const f_idx&b){
   return a.d > b.d; // priority_queue max first: we want min first
 }
 
