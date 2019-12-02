@@ -247,6 +247,7 @@ void display(void){
 
   // iterate over dataset
   GLint picked = -1;
+
   for0(i, nrow){
     for0(j, ncol){
 
@@ -273,19 +274,25 @@ void display(void){
 
       // turn this off later?
       if(!path_mode){
-        if(label[k] != label[picked]){
+        if(label[k] != label[selected]){
+          //picked])
           //selected])
 
           glColor3f(label_r[k], label_g[k], label_b[k]);
         }
         else{
-          if(picked != k){
-            // selected
+          // label[j] == label[selected]
+
+          glColor3f(1, 1, 1);
+          /*
+          if(selected != k){
+            // picked
             glColor3f(1. - label_r[k], 1. - label_g[k], 1. - label_b[k]);
           }
           else{
             glColor3f(label_r[k], label_g[k], label_b[k]);
           }
+          */
         }
       }
 
@@ -384,17 +391,20 @@ void display(void){
 
   vector<size_t>::iterator vi;
   for(vi = mins.begin(); vi != mins.end(); vi++){
+    float size = 0.01;
     size_t k = *vi;
     if(label[k] == label[picked]){
-      glColor3f(0, 1, 1);
+      glColor3f(1, 0, 0.);
+      size *= 3;
     }
     else{
-      glColor3f(.5, 0, 0);
+      glColor3f(1, 1, 1);
     }
 
     glPushMatrix();
     glTranslatef(points[k].x, points[k].y, points[k].z);
-    glutSolidSphere(0.01, 20, 20);
+
+    glutSolidSphere(size, 20, 20);
     glPopMatrix();
   }
 

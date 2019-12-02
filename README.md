@@ -11,3 +11,17 @@ quick and dirty dem visualization, started with repo "multiPick" and went from t
 ubuntu:
   make
   ./dem
+
+## patches
+
+Labelled patches correspond to basins of attraction. 
+
+Todo for watershed delineation: calculate spill map (function from set of patches, to set of patches; has an associated "spill level"):
+
+Spill map identifies, for an input patch, a lower-altitude patch such that, water from the input patch will spill into, provided a certain altitude of water (the spill level) is spilled onto that patch.
+
+Note: In the case that the patch is locally minimal, the spill map may refer to a patch that's not adjacent. 
+
+Calculating the spill map involves marching upwards, a minimal amount, until the water spills over into a lower-altitude patch.
+
+Altitude of a patch is defined as the minimal altitude for that patch 
