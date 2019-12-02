@@ -7,3 +7,7 @@ quick and dirty dem visualization, started with repo "multiPick" and went from t
 
 ## downhill operator
 ![alt text](downhill.png)
+
+ubuntu:
+  make
+  ./dem.exe
