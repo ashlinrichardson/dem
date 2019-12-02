@@ -13,8 +13,9 @@ ubuntu:
   ./dem
 
 ## patches
+Labelled patches (distinct colours) correspond to basins of attraction (for water)
 
-Labelled patches correspond to basins of attraction. 
+## spill map (todo)
 
 Todo for watershed delineation: calculate spill map (function from set of patches, to set of patches; has an associated "spill level"):
 
