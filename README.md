@@ -2,15 +2,17 @@
 quick and dirty dem visualization, started with repo "multiPick" and went from there..data is from:
 
 * Canada geospatial extraction tool: https://maps.canada.ca/czs/index-en.html
+
+## run demo:
+On ubuntu:
+  make
+  ./dem
+  
 ## dem data
 ![alt text](dem.png)
 
 ## downhill operator
 ![alt text](downhill.png)
-
-ubuntu:
-  make
-  ./dem
 
 ## patches
 Labelled patches (distinct colours) correspond to basins of attraction (for water)
