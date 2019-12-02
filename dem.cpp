@@ -18,8 +18,14 @@
 
 size_t nrow, ncol, nband;
 float * dat; // dem data: nrow * ncol linear array of floats
+
 float * label;
 size_t next_label;
+float * label_r;
+float * label_g;
+float * label_b;
+
+vector<size_t> mins;
 
 float zmax, zmin; // dem extrema
 size_t kmax, kmin;
@@ -125,6 +131,66 @@ class point{
   }
 };
 
+void color_wheel(){
+  float r, g, b;
+  size_t np = nrow * ncol;
+  if(!label_r){
+    label_r = falloc(np);
+    label_g = falloc(np);
+    label_b = falloc(np);
+  }
+
+  size_t i;
+  size_t ci = 0;
+  float label_max = 0.;
+  for0(i, nrow * ncol){
+    if(label[i] > label_max){
+      label_max = label[i];
+    }
+  }
+  map<float, float> l_r;
+  map<float, float> l_g;
+  map<float, float> l_b;
+
+  l_r[0.] = 0.;
+  l_g[0.] = 0.;
+  l_b[0.] = 0.;
+
+  vector<size_t> points;
+  vector<size_t>::iterator it;
+  for(i = 1; i <= (size_t) label_max; i++){
+    points.push_back(i);
+  }
+  std::srand ( unsigned ( std::time(0) ) );
+  std::random_shuffle(points.begin(), points.end());
+  for(it = points.begin(); it != points.end(); it++){
+    i = *it;
+    float h, s, v;
+    s = v = 1;
+    h = 360. * (float)ci / (float)(label_max - 1);
+    hsv_to_rgb(&r, &g, &b, h, s, v);
+    l_r[i] = r;
+    l_g[i] = g;
+    l_b[i] = b;
+    ci += 1;
+  }
+
+  for0(i, np){
+    float d = label[i];
+    if(d == 0.){
+      label_r[i] = 0.;
+      label_g[i] = 0.;
+      label_b[i] = 0.;
+    }
+    else{
+      label_r[i] = l_r[d];
+      label_g[i] = l_g[d];
+      label_b[i] = l_b[d];
+      // printf("r %f g %f b %f\n", label_r[i], label_g[i], label_b[i]);
+    }
+  }
+}
+
 /* Callback function for drawing */
 void display(void){
   size_t i, j, k;
@@ -165,6 +231,20 @@ void display(void){
   //lowpoint
   points[kmin].axis(.2);
 
+  bool path_mode = false;
+
+  /*
+  vector<size_t>::iterator vi;
+  for(vi = mins.begin(); vi != mins.end(); vi++){
+    size_t k = *vi;
+    glColor3f(1, 1, 1);
+    glPushMatrix();
+    glTranslatef(points[k].x, points[k].y, points[k].z);
+    glutSolidSphere(0.01, 20, 20);
+    glPopMatrix();
+  }
+  */
+
   // iterate over dataset
   GLint picked = -1;
   for0(i, nrow){
@@ -173,7 +253,7 @@ void display(void){
       k = i * ncol + j;
       glPushName(k);
 
-      glColor3f(0, .5, 0);
+      if(path_mode) glColor3f(0, .5, 0);
       if(myPickNames.count(k)){
         //glColor3f(1, 0, 1);
         picked = k;
@@ -187,62 +267,81 @@ void display(void){
           special_key = -1;
         }
       }
-      if(selected == k){
+      if(selected == k && path_mode){
         glColor3f(1, 0, 1);
+      }
+
+      // turn this off later?
+      if(!path_mode){
+        if(label[k] != label[picked]){
+          //selected])
+
+          glColor3f(label_r[k], label_g[k], label_b[k]);
+        }
+        else{
+          if(picked != k){
+            // selected
+            glColor3f(1. - label_r[k], 1. - label_g[k], 1. - label_b[k]);
+          }
+          else{
+            glColor3f(label_r[k], label_g[k], label_b[k]);
+          }
+        }
       }
 
       glBegin(GL_LINES);
       points[k].vertex();
       points[down[k]].vertex();
       glEnd();
-
       glPopName();
     }
   }
 
-  // up lines
-  printf("up\n");
-  for0(i, nrow){
-    for0(j, ncol){
+  if(path_mode){
+    // up lines
+    printf("up\n");
+    for0(i, nrow){
+      for0(j, ncol){
 
-      k = i * ncol + j;
-      glPushName(k);
+        k = i * ncol + j;
+        glPushName(k);
 
-      glColor3f(.5, 0, .5);
-      if(myPickNames.count(k)){
-        picked = k;
-        selected = k;
-        flood_step = 0; // right arrow should increase
-        dry_list.clear();
-        wet_list.clear();
+        glColor3f(.5, 0, .5);
+        if(myPickNames.count(k)){
+          picked = k;
+          selected = k;
+          flood_step = 0; // right arrow should increase
+          dry_list.clear();
+          wet_list.clear();
 
-        if(special_key == 114){
-          rX = points[k];
-          special_key = -1;
+          if(special_key == 114){
+            rX = points[k];
+            special_key = -1;
+          }
         }
-      }
-      if(selected == k){
-        glColor3f(0, 1, 0);
-      }
+        if(selected == k){
+          glColor3f(0, 1, 0);
+        }
 
-      glBegin(GL_LINES);
-      points[k].vertex();
-      points[up[k]].vertex();
-      glEnd();
+        glBegin(GL_LINES);
+        points[k].vertex();
+        points[up[k]].vertex();
+        glEnd();
 
-      glPopName();
+        glPopName();
+      }
     }
-  }
 
+  }
   // draw the path down for the thing that gets picked!
-  if(selected > 0){
+  if(selected > 0 && path_mode){
     GLint last = -1;
     GLint pos = selected; //picked;
     while(last != pos){
       last = pos;
       pos = down[pos];
 
-      printf(" last %d pos %d\n", (int)last, (int)pos);
+      // printf(" last %d pos %d\n", (int)last, (int)pos);
       cout << "\t" << (points[pos]) << endl;
 
       glColor3f(0, 0, 1);
@@ -281,6 +380,22 @@ void display(void){
       points[*t].vertex();
       glEnd();
     }
+  }
+
+  vector<size_t>::iterator vi;
+  for(vi = mins.begin(); vi != mins.end(); vi++){
+    size_t k = *vi;
+    if(label[k] == label[picked]){
+      glColor3f(0, 1, 1);
+    }
+    else{
+      glColor3f(.5, 0, 0);
+    }
+
+    glPushMatrix();
+    glTranslatef(points[k].x, points[k].y, points[k].z);
+    glutSolidSphere(0.01, 20, 20);
+    glPopMatrix();
   }
 
   drawText();
@@ -501,11 +616,12 @@ float climb(size_t i, size_t j, size_t nrow, size_t ncol, float * dat, float * l
 
   // this point is not yet labelled
 
-  nb = nbhd(i, j);
   size_t i_min = i;
   size_t j_min = j;
-  float d = dat[i * ncol + j];
+  float d = dat[n]; // i * ncol + j];
   float d_min = d;
+
+  nb = nbhd(i, j);
 
   // find lowest-altitude neighbour, this point included
   for(it = nb.begin(); it != nb.end(); it ++){
@@ -513,7 +629,7 @@ float climb(size_t i, size_t j, size_t nrow, size_t ncol, float * dat, float * l
     ni = n / ncol;
     nj = n % ncol;
 
-    float d = dat[ni * ncol + nj];
+    float d = dat[n] ; //ni * ncol + nj];
     if(d < d_min){
       d_min = d;
       i_min = ni;
@@ -527,12 +643,13 @@ float climb(size_t i, size_t j, size_t nrow, size_t ncol, float * dat, float * l
     label[i * ncol + j] = lab;
     next_label++;
 
+    mins.push_back(i*ncol + j);
     printf("new label: %ld @ %ld\n", (long int)lab, i*ncol + j);
     return lab;
   }
   else{
     // case 2: recurse to lower neighbour
-    return climb(ni, nj, nrow, ncol, dat, label, next_label);
+    return climb(i_min, j_min, nrow, ncol, dat, label, next_label);
   }
 
   // size_t k = di * ncol + dj;
@@ -540,6 +657,7 @@ float climb(size_t i, size_t j, size_t nrow, size_t ncol, float * dat, float * l
 }
 
 int main(int argc, char ** argv){
+  label_r = label_g = label_b = NULL;
 
   size_t i, j;
   rX.x = rX.y = rX.z = 0.;
@@ -568,14 +686,15 @@ int main(int argc, char ** argv){
   for0(i, np) label[i] = 0.;
 
   // should plot the neighbourhoods from the other direction (climb on -z, too!)
+
   for0(i, nrow){
     for0(j, ncol){
       size_t n = i * ncol + j;
       label[n] = climb(i, j, nrow, ncol, dat, label, next_label);
     }
   }
-
-  exit(1);
+  cout << "mins" << mins << endl;
+  color_wheel();
 
   points = new vec3d[nrow * ncol];
   for0(i, nrow){
@@ -584,7 +703,9 @@ int main(int argc, char ** argv){
       points[k].x = ((float)i) / ((float)nrow); //- .5;
       points[k].y = ((float)j) / ((float)ncol); //- .5;
       points[k].z = dat[k]; // / 300. ;
-      if(dat[k] != 0.) cout << points[k].x << " " << points[k].y << " " << points[k].z << endl;
+      if(dat[k] != 0.){
+        // cout << points[k].x << " " << points[k].y << " " << points[k].z << endl;
+      }
       if(points[k].z > zmax){
         zmax = points[k].z;
         kmax = k;
