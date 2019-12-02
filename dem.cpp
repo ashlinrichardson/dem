@@ -18,6 +18,8 @@
 
 size_t nrow, ncol, nband;
 float * dat; // dem data: nrow * ncol linear array of floats
+float * label;
+size_t next_label;
 
 float zmax, zmin; // dem extrema
 size_t kmax, kmin;
@@ -31,8 +33,8 @@ size_t flood_step; // flood step variable
 set<size_t> dry_list; // list of dry neighbours
 set<size_t> wet_list; // list of wet neighbours
 
-vector<size_t> nbhd(size_t i, size_t j){
-  printf("nbhd(%d, %d)\n", (int)i, (int)j);
+inline vector<size_t> nbhd(size_t i, size_t j){
+  // printf("nbhd(%d, %d)\n", (int)i, (int)j);
   vector<size_t> r;
   long int m, n, di, dj;
   for(m = -1; m <= 1; m++){
@@ -45,7 +47,7 @@ vector<size_t> nbhd(size_t i, size_t j){
       }
     }
   }
-  cout << "nbhd(" << i *ncol + j << ") " << r << endl;
+  // cout << "nbhd(" << i *ncol + j << ") " << r << endl;
   return r;
 }
 
@@ -339,7 +341,7 @@ void special(int key, int x, int y){
       while(pq.top().d <= maxz){
         dry_list.erase(pq.top().idx);
         wet_list.insert(pq.top().idx);
-	cout << "makewet z(" << pq.top().idx << ")=" << pq.top().d << endl;
+        cout << "makewet z(" << pq.top().idx << ")=" << pq.top().d << endl;
         pq.pop();
       }
     }
@@ -354,7 +356,7 @@ void special(int key, int x, int y){
       while(pq.top().d == minz){
         dry_list.erase(pq.top().idx);
         wet_list.insert(pq.top().idx);
-	cout << "makewet2 z(" << pq.top().idx << ")=" << pq.top().d << endl;
+        cout << "makewet2 z(" << pq.top().idx << ")=" << pq.top().d << endl;
         pq.pop();
       }
     }
@@ -488,25 +490,94 @@ void idle(){
   }
 }
 
+float climb(size_t i, size_t j, size_t nrow, size_t ncol, float * dat, float * label, size_t & next_label){
+  size_t ni, nj, n;
+  vector<size_t> nb;
+  vector<size_t>::iterator it;
+
+  // base case: this point already labelled
+  n = i * ncol + j;
+  if(label[n] > 0.) return label[n];
+
+  // this point is not yet labelled
+
+  nb = nbhd(i, j);
+  size_t i_min = i;
+  size_t j_min = j;
+  float d = dat[i * ncol + j];
+  float d_min = d;
+
+  // find lowest-altitude neighbour, this point included
+  for(it = nb.begin(); it != nb.end(); it ++){
+    n = *it;
+    ni = n / ncol;
+    nj = n % ncol;
+
+    float d = dat[ni * ncol + nj];
+    if(d < d_min){
+      d_min = d;
+      i_min = ni;
+      j_min = nj;
+    }
+  }
+
+  if(d == d_min){
+    // case 1: this point minimal
+    size_t lab = (float)next_label;
+    label[i * ncol + j] = lab;
+    next_label++;
+
+    printf("new label: %ld @ %ld\n", (long int)lab, i*ncol + j);
+    return lab;
+  }
+  else{
+    // case 2: recurse to lower neighbour
+    return climb(ni, nj, nrow, ncol, dat, label, next_label);
+  }
+
+  // size_t k = di * ncol + dj;
+  //exit(0);
+}
+
 int main(int argc, char ** argv){
-   
+
+  size_t i, j;
   rX.x = rX.y = rX.z = 0.;
+
+  str fn("sub_3x3.bin");
+  str hfn("sub_3x3.hdr");
+
+  /*
   str fn("sub.bin");
   str hfn("sub.hdr");
 
-  /*
   str fn("out.bin");
   str hfn("out.hdr");
   */
 
   hread(hfn, nrow, ncol, nband);
   dat = bread(fn, nrow, ncol, nband);
+  size_t np = nrow * ncol;
+
   zmax = 0.;
   kmax = kmin = 0;
   zmin = (float)FLT_MAX;
 
+  next_label = 1; // convention: 0 is unlabelled
+  label = falloc(np);
+  for0(i, np) label[i] = 0.;
+
+  // should plot the neighbourhoods from the other direction (climb on -z, too!)
+  for0(i, nrow){
+    for0(j, ncol){
+      size_t n = i * ncol + j;
+      label[n] = climb(i, j, nrow, ncol, dat, label, next_label);
+    }
+  }
+
+  exit(1);
+
   points = new vec3d[nrow * ncol];
-  size_t i, j;
   for0(i, nrow){
     for0(j, ncol){
       size_t k = (i * ncol) + j;
@@ -529,7 +600,7 @@ int main(int argc, char ** argv){
     for0(j, ncol){
       size_t k = i *ncol + j;
       points[k].z -= zmin;
-      points[k].z /= zmax;
+      points[k].z /= (zmax - zmin);
       points[k].z *= 0.6;
     }
   }

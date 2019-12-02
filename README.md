@@ -10,4 +10,4 @@ quick and dirty dem visualization, started with repo "multiPick" and went from t
 
 ubuntu:
   make
-  ./dem.exe
+  ./dem
