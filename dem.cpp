@@ -672,16 +672,14 @@ int main(int argc, char ** argv){
   size_t i, j;
   rX.x = rX.y = rX.z = 0.;
 
-  str fn("sub_3x3.bin");
-  str hfn("sub_3x3.hdr");
+  str fn("stack.bin");
+  str hfn("stack.hdr");
 
-  /*
-  str fn("sub.bin");
-  str hfn("sub.hdr");
-
-  str fn("out.bin");
-  str hfn("out.hdr");
-  */
+  FILE * f = fopen(fn.c_str(), "wb");
+  if(!f){
+    err("expected input file: stack.bin");
+  }
+  fclose(f);
 
   hread(hfn, nrow, ncol, nband);
   dat = bread(fn, nrow, ncol, nband);
